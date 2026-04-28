@@ -1,9 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+
 import { AuthRepository } from './auth.repository';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { loginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +29,7 @@ export class AuthService {
     });
   }
 
-  async login(data: { email: string; password: string }) {
+  async login(data: loginDto) {
     const user = await this.repo.findUserByEmail(data.email);
 
     if (!user) {
@@ -37,7 +38,7 @@ export class AuthService {
 
     const isMatch = await bcrypt.compare(data.password, user.password);
 
-    if (!isMatch) return new BadRequestException('Invalid password');
+    if (!isMatch) throw new BadRequestException('Invalid password');
 
     const payload = {
       sub: user.id,
